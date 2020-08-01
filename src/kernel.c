@@ -13,29 +13,31 @@ void kernel(){
     test[2] = 0;
     print_str(test);
     free(test);
-    if(0){
     
 
     file * f2 = fopen("/hello3", "a");
     char * towrite = "asd";
+    suspend_machine();
+    yield();
     fwrite(towrite, 3 ,1 ,f2);
     fclose(f2);
     
     file * f = fopen("/hello3", "rw+");
-    print_i32((int) f);
-    print_str("\n"); 
     if(f != NULL){
       char buffer[100];
       int cnt = 0;
+
       while(0 < (cnt = fread(buffer, 1, 100, f))){
 	buffer[cnt] = 0;
 	print_str(buffer);
       }
       print_str("\n");
+      suspend_machine();
+      yield();
+
       fclose(f);
     }
 
-    }
     suspend_machine();
     yield();
   }

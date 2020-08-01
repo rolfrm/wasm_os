@@ -2,6 +2,7 @@
 typedef struct{
   void (* suspend)(io_writer * writer, void * user_data);
   void (* resume) (io_reader * reader, void * user_data);
+  void (* register_driver)(wasm_module * mod, void * user_data);
   void * user_data;
 }machine_driver;
 
@@ -24,3 +25,5 @@ void register_alloc(wasm_module * mod);
 
 void machine_add_driver(machine * m, machine_driver driver);
 void machine_add_module(machine * m, wasm_module * mod, const char * path);
+
+machine_driver filesystem_driver();

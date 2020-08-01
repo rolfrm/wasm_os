@@ -1,6 +1,6 @@
 OPT = -g1 -Og
 
-LIB_SOURCES1 = main.c alloc.c
+LIB_SOURCES1 = main.c alloc.c filesystem.c
 LIB_SOURCES = $(addprefix src/, $(LIB_SOURCES1))
 
 CC = gcc
