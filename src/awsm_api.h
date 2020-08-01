@@ -1,3 +1,4 @@
+#define NOINLINE __attribute__ ((noinline))
 
 extern void awsm_sleep(int ms);
 extern void print_str(const char * str);
@@ -18,3 +19,14 @@ void fclose(file * f);
 size_t fread ( void * ptr, size_t size, size_t count, FILE * stream );
 size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream );
 #define NULL 0
+
+extern void NOINLINE suspend_machine();
+extern void NOINLINE suspend();
+extern void NOINLINE yield();
+
+
+/* TO IMPLEMENT
+int execvpe(const char *file, char *const argv[],
+char *const envp[]);
+
+ */

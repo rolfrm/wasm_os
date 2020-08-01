@@ -2,16 +2,19 @@
 #include "awsm_api.h"
 
 void kernel(){
+  char c = 'A';
   while(1){
-
-    awsm_sleep(1000);
+    if(c > 'Z')
+      c = 'A';
     print_str("Hello world\n"); 
     char * test = malloc(8);
-    test[0] = 'A';
-    test[1] = 0;
+    test[0] = c++;
+    test[1] = '\n';
+    test[2] = 0;
     print_str(test);
     free(test);
-
+    if(0){
+    
 
     file * f2 = fopen("/hello3", "a");
     char * towrite = "asd";
@@ -23,12 +26,18 @@ void kernel(){
     print_str("\n"); 
     if(f != NULL){
       char buffer[100];
-      fread(buffer, 100, 1, f);
-      print_str(buffer);
+      int cnt = 0;
+      while(0 < (cnt = fread(buffer, 1, 100, f))){
+	buffer[cnt] = 0;
+	print_str(buffer);
+      }
       print_str("\n");
       fclose(f);
     }
-    
+
+    }
+    suspend_machine();
+    yield();
   }
 
 }
