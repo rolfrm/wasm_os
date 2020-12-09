@@ -1,4 +1,5 @@
 #include <iron/full.h>
+#include <microio.h>
 #include <awsm.h>
 
 typedef wasm_execution_stack stack;
@@ -59,16 +60,16 @@ void suspend_core(machine * m, const char * path){
   sprintf(buf, "%s.tmp", path);
   FILE * f = fopen(buf, "w");
   binary_io io = {.f = write_some, .user_data = f};
-  writer_write_u32(&io, m->module_count);
+  io_write_u32(&io, m->module_count);
   for(u32 i = 0; i < m->module_count; i++){
-    writer_write_str(&io, m->module_path[i]);
+    io_write_str0(&io, m->module_path[i]);
     awsm_module_save(&io, m->modules[i]);
-    writer_write_u32(&io, marker_object);
+    io_write_u32(&io, marker_object);
   }
   
   for(u32 i = 0; i < m->driver_count; i++){
     m->drivers[i].suspend(&io, m->drivers[i].user_data);
-    writer_write_u32(&io, marker_object);
+    io_write_u32(&io, marker_object);
   }
   
   fclose(f);
@@ -77,21 +78,21 @@ void suspend_core(machine * m, const char * path){
 }
 
 void _resume_core(binary_io * rd, machine * m){
-  u32 module_count = reader_readu32_fixed(rd);
+  u32 module_count = io_read_u32(rd);
   printf("Modules: %i\n", module_count);
   for(u32 i = 0; i < module_count; i++){
-    char * path = reader_read_str(rd);
+    char * path = io_read_str0(rd);
     printf("loading module %s \n", path);
     wasm_module * mod = awsm_load_module_from_file(path);
     machine_add_module(m, mod, path);
     awsm_module_load(rd, mod);
-    u32 marker_check = reader_readu32_fixed(rd);
+    u32 marker_check = io_read_u32(rd);
     ASSERT(marker_check == marker_object);
   }
 
   for(u32 i = 0; i < m->driver_count; i++){
     m->drivers[i].resume(rd, m->drivers[i].user_data);
-    u32 marker_check = reader_readu32_fixed(rd);
+    u32 marker_check = io_read_u32(rd);
     ASSERT(marker_check == marker_object);
   }
 }
@@ -106,11 +107,9 @@ bool resume_core(machine * m, const char * path){
   return true;
 }
 
-
 int main(int argc, char ** argv){
   UNUSED(argc);UNUSED(argv);
   
-
   //awsm_log_diagnostic = true;
   machine vm = {0};
   machine_add_driver(&vm, filesystem_driver());

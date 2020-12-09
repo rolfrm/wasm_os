@@ -1,0 +1,3 @@
+[submodule "libawsm"]
+	path = libawsm
+	url = git@github.com:rolfrm/awsm.git

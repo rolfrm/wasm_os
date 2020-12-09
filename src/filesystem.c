@@ -1,4 +1,5 @@
 #include <iron/full.h>
+#include <microio.h>
 #include <awsm.h>
 
 typedef wasm_execution_stack stack;
@@ -21,31 +22,31 @@ typedef struct{
 
 static filesystem_data fd = {.files = NULL, .files_count = 0, .free = -1};
 
-void filesystem_suspend(data_writer * writer, void * user_data){
+void filesystem_suspend(io_writer * writer, void * user_data){
   UNUSED(user_data);
-  writer_write_u32(writer, fd.files_count);
-  writer_write(writer, fd.files, sizeof(fd.files[0]) * fd.files_count);
+  io_write_u32(writer, fd.files_count);
+  io_write(writer, fd.files, sizeof(fd.files[0]) * fd.files_count);
   for(u32 i = 0; i < fd.files_count; i++){
     if(fd.files[i].name != NULL){
       ASSERT(fd.files[i].file != NULL);
-      writer_write_str(writer, fd.files[i].name);
-      writer_write_str(writer, fd.files[i].perm);
+      io_write_str0(writer, fd.files[i].name);
+      io_write_str0(writer, fd.files[i].perm);
     }
   }
 
-  writer_write_i32(writer, fd.free);
+  io_write_i32(writer, fd.free);
 }
 
-void filesystem_resume(data_reader * reader, void * user_data){
+void filesystem_resume(io_reader * reader, void * user_data){
   UNUSED(user_data);
-  u32 count = reader_readu32_fixed(reader);
+  u32 count = io_read_u32(reader);
   fd.files = alloc0(sizeof(fd.files[0]) * count);
   fd.files_count = count;
-  reader_read(reader, fd.files, sizeof(fd.files[0]) * count);
+  io_read(reader, fd.files, sizeof(fd.files[0]) * count);
   for(u32 i = 0; i < count; i++){
     if(fd.files[i].name != NULL){
-      fd.files[i].name = reader_read_str(reader);
-      fd.files[i].perm = reader_read_str(reader);
+      fd.files[i].name = io_read_str0(reader);
+      fd.files[i].perm = io_read_str0(reader);
       fd.files[i].file = fopen(fd.files[i].name, fd.files[i].perm);
       fseek(fd.files[i].file, fd.files[i].offset, SEEK_SET);
       ASSERT(fd.files[i].file != NULL);
@@ -55,7 +56,7 @@ void filesystem_resume(data_reader * reader, void * user_data){
 
   }
   
-  fd.free = reader_readi32_fixed(reader);
+  fd.free = io_read_i32(reader);
   
 }
 

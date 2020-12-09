@@ -1,5 +1,6 @@
 
 #include <iron/full.h>
+#include <microio.h>
 #include <awsm.h>
 
 typedef wasm_execution_stack stack;
